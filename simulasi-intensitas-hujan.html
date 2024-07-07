@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Intensitas Hujan Bulanan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        input {
+            margin: 5px;
+            width: 60px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        #inputContainer {
+            margin-top: 10px;
+        }
+        #inputContainer div {
+            margin-bottom: 15px;
+        }
+        .input-div {
+            max-width: 50rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simulasi Intensitas Curah Hujan Bulanan</h1>
+    <label for="numInputs">Jumlah Input:</label>
+    <input type="number" id="numInputs" min="1" value="100" required>
+    <button onclick="generateInputsByClick()">Buat Input</button>
+
+    <div id="inputContainer"></div>
+
+    <br />
+    <button onclick="buatSimulasiIntensitasCurahHujan()">Buat Simulasi</button>
+
+    <table id="resultsTable">
+        <thead>
+            <tr>
+                <th rowspan="2">Bulan</th>
+                <th colspan="2">Angka Acak</th>
+                <th colspan="4">Simulasi</th>
+            </tr>
+            <tr>
+                <th>Curah Hujan</th>
+                <th>Lama Hujan</th>
+                <th>Curah Hujan</th>
+                <th>Lama Hujan</th>
+                <th>Intensitas Curah Hujan</th>
+                <th>Status Cuaca</th>
+            </tr>
+        </thead>
+        <tbody id="resultsBody">
+        </tbody>
+    </table>
+
+    <script src="script.js"></script>
+</body>
+</html>
