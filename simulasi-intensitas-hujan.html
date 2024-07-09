@@ -35,6 +35,9 @@
         .input-div {
             max-width: 50rem;
         }
+        .grafik{
+          margin-top: 50px;
+        }
     </style>
 </head>
 <body>
@@ -68,8 +71,17 @@
         </tbody>
     </table>
 
-    
+    <div class="grafik">
+      <h2 id="label-grafik-cuaca"></h2>
+      <canvas id="statusCuacaChart"></canvas>
+    </div>
 
+    <div class="grafik">
+      <h2 id="label-grafik-simulasi"></h2>
+      <canvas id="simulasiChart"></canvas>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
