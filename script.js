@@ -35,6 +35,9 @@ function generateInputsByClick() {
 }
 
 function generateInputs(numInputs, defaultVal = false) {
+    const resultsBody = document.getElementById('resultsBody');
+    resultsBody.innerHTML = '';
+
     const inputContainer = document.getElementById('inputContainer');
     inputContainer.innerHTML = '';
 
@@ -193,7 +196,7 @@ function getIntervalAngkaAcak() {
     let sortedKeysLH = Object.keys(frekuensiLamaHujan).sort((a, b) => a - b);
     let intervalAngkaAcakLH = {}
 
-    if(Object.keys(frekuensiLamaHujan).length < 100){
+    if(Object.keys(frekuensiLamaHujan).length < 8){
         let probKumLastLH = 0;
         for(let i = 0; i < sortedKeysLH.length; i++){
             const curKey = sortedKeysLH[i]
@@ -204,6 +207,35 @@ function getIntervalAngkaAcak() {
             let intervalAngkaAcakLHVal = probKum * 100 - 1
             intervalAngkaAcakLH[intervalAngkaAcakLHVal] = curKey
     
+        }
+    }else{
+        let rentang = Object.keys(frekuensiLamaHujan).at(-1) - Object.keys(frekuensiLamaHujan).at(0) 
+        let banyakKelas = Math.round(1 + 3.3 * Math.log10(curahHujanInputs.length))
+        let panjangKelas = Math.round(rentang / banyakKelas)
+        let intervalFrekuensi = []
+        let intervalAtasTerakhir = Object.keys(frekuensiLamaHujan).at(0) - 1
+        for(let i = 0; i < banyakKelas; i++){
+            let intervalAtas = intervalAtasTerakhir + panjangKelas
+            intervalFrekuensi.push({[intervalAtas]:0})
+            intervalAtasTerakhir = intervalAtas
+        }
+
+        let probKumLast = 0
+        let j = 0
+        for(let i = 0; i < intervalFrekuensi.length; i++){
+            let curKey = parseInt(Object.keys(intervalFrekuensi[i])[0])
+            while(j <= parseInt(Object.keys(intervalFrekuensi[i])[0])){
+                if(String(j) in frekuensiLamaHujan){
+                    intervalFrekuensi[i][curKey] += frekuensiLamaHujan[String(j)]
+                }
+                j += 1
+            }
+            let nilaiTengah = (curKey + (curKey - panjangKelas + 1)) / 2
+            let probabilitas = intervalFrekuensi[i][curKey] / lamaHujanInputs.length
+            let probKum = probKumLast + probabilitas
+            probKumLast = probKum
+            let intervalAngkaAcakLHVal = probKum * 100 - 1
+            intervalAngkaAcakLH[intervalAngkaAcakLHVal] = nilaiTengah
         }
     }
 
