@@ -24,6 +24,9 @@ const defaultLamaHujan = [
     2, 19, 19, 25, 6, 27, 22, 5, 13, 31
 ];
 
+let simulasiChart;
+let cuacaChart;
+
 function generateInputsByClick() {
     const numInputs = document.getElementById('numInputs').value;
 
@@ -41,7 +44,18 @@ function generateInputs(numInputs, defaultVal = false) {
     const inputContainer = document.getElementById('inputContainer');
     inputContainer.innerHTML = '';
 
-    // Create Curah Hujan inputs
+    const cuacaChartLabel = document.getElementById('label-grafik-cuaca')
+    cuacaChartLabel.innerHTML = ''
+    const simulasiChartLabel = document.getElementById('label-grafik-simulasi')
+    simulasiChartLabel.innerHTML = ''
+
+    if(simulasiChart){
+        simulasiChart.destroy()
+    }
+    if(cuacaChart){
+        cuacaChart.destroy()
+    }
+
     const curahHujanDiv = document.createElement('div');
     curahHujanDiv.innerHTML = '<label>Curah Hujan Bulanan (mm):</label><br>';
     curahHujanDiv.classList.add('input-div')
@@ -59,7 +73,6 @@ function generateInputs(numInputs, defaultVal = false) {
     }
     inputContainer.appendChild(curahHujanDiv);
 
-    // Create Lama Hujan inputs
     const lamaHujanDiv = document.createElement('div');
     lamaHujanDiv.classList.add('input-div')
     lamaHujanDiv.innerHTML = '<label>Lama Hujan Bulanan (hari):</label><br>';
@@ -88,7 +101,8 @@ function buatSimulasiIntensitasCurahHujan() {
     let zTerakhirCH = 10122034
     let zTerakhirLH = 10122002
 
-    let banyakSimulasi = 100;
+    const banyakSimulasi = document.getElementById('numSimulation').value
+    let dataHasilSimulasi = []
 
     for(let i = 0; i < banyakSimulasi; i++){
         zTerakhirCH = simulasiAngkaAcak(11, 29, 997, zTerakhirCH)
@@ -129,6 +143,13 @@ function buatSimulasiIntensitasCurahHujan() {
         let intensitasCurahHujan = nilaiSimulasiCH / nilaiSimulasiLH
         let statusCuaca = getStatusCuaca(intensitasCurahHujan)
         
+        dataHasilSimulasi.push({
+            nilaiSimulasiCH: Math.round(nilaiSimulasiCH),
+            nilaiSimulasiLH: Math.round(nilaiSimulasiLH),
+            intensitasCurahHujan: Math.round(intensitasCurahHujan),
+            statusCuaca: statusCuaca
+        });
+
         const row = `<tr>
                         <td>${i + 1}</td>
                         <td>${Math.round(angkaAcakCH)}</td>
@@ -140,6 +161,9 @@ function buatSimulasiIntensitasCurahHujan() {
                     </tr>`;
         resultsBody.insertAdjacentHTML('beforeend', row);
     }
+
+    buatChartPerhitunganStatusCuaca(dataHasilSimulasi)
+    buatChartHasilSimulasi(dataHasilSimulasi)
 }
 
 function getIntervalAngkaAcak() {
@@ -155,11 +179,15 @@ function getIntervalAngkaAcak() {
         let curLamaHujanVal = lamaHujanInputs[i].value
 
         if(curCurahHujanVal == "" || curLamaHujanVal == ""){
-            return alert("Input tidak valid!!")
+            return alert("Input tidak valid.")
+        }
+
+        if(curCurahHujanVal < 0 || curLamaHujanVal < 0){
+            return alert("Input tidak boleh bernilai negatif.")
         }
 
         if(curLamaHujanVal > 31){
-            return alert("Input lama hujan tidak boleh lebih dari 31")
+            return alert("Input lama hujan tidak boleh lebih dari 31.")
         }
         
         if(String(curCurahHujanVal) in frekuensiCurahHujan){
@@ -247,6 +275,130 @@ function simulasiAngkaAcak(a, c, m, zSebelum) {
     return zi
 }
 
+function buatChartHasilSimulasi(dataHasilSimulasi) {
+    const simulasiChartLabel = document.getElementById('label-grafik-simulasi')
+    simulasiChartLabel.innerHTML = 'Hasil Simulasi Intensitas Curah Hujan per Bulan'
+
+    const ctx = document.getElementById('simulasiChart');
+    ctx.innerHTML = ''
+
+    const intensitasCurahHujan = dataHasilSimulasi.map(data => data.intensitasCurahHujan);
+
+    const data = {
+        labels: Array.from({ length: intensitasCurahHujan.length }, (_, i) => i + 1),
+        datasets: [{
+            label: 'Intensitas Curah Hujan',
+            data: intensitasCurahHujan,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        }]
+    };
+
+    if(simulasiChart){
+        simulasiChart.destroy()
+    }
+
+    simulasiChart = new Chart(ctx, {
+        type: 'bar',
+        data: data,
+        options: {
+            plugins : {
+                legend : false
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Bulan ke-'
+                    },
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Intensitas Curah Hujan'
+                    },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+}
+
+function buatChartPerhitunganStatusCuaca(dataHasilSimulasi){
+    const cuacaChartLabel = document.getElementById('label-grafik-cuaca')
+    cuacaChartLabel.innerHTML = "Jumlah Kemunculan Setiap Intensitas Curah Hujan"
+
+    const ctxStatusCuaca = document.getElementById('statusCuacaChart').getContext('2d');
+    ctxStatusCuaca.innerHTML = ''
+
+    // Hitung jumlah kemunculan setiap status cuaca
+    const statusCuacaCount = dataHasilSimulasi.reduce((acc, data) => {
+        if (acc[data.statusCuaca]) {
+            acc[data.statusCuaca]++;
+        } else {
+            acc[data.statusCuaca] = 1;
+        }
+        return acc;
+    }, {});
+
+     const statusCuacaLabels = [
+        'Hujan Sangat Ringan',
+        'Hujan Ringan',
+        'Hujan Sedang',
+        'Hujan Lebat',
+        'Hujan Sangat Lebat'
+    ];
+
+    const statusCuacaData = statusCuacaLabels.map(label => statusCuacaCount[label] || 0);
+
+
+    const statusCuacaColors = [
+        'rgba(167, 230, 255, 0.7)', // Hujan Sangat Ringan
+        'rgba(58, 190, 249, 0.7)', // Hujan Ringan
+        'rgba(53, 114, 239, 0.7)',  // Hujan Sedang
+        'rgba(47, 54, 196, 0.7)',  // Hujan Lebat
+        'rgba(0, 20, 120, 0.7)'      // Hujan Sangat Lebat
+    ];
+
+    const dataStatusCuaca = {
+        labels: statusCuacaLabels,
+        datasets: [{
+            label: 'Jumlah Kemunculan Status Cuaca',
+            data: statusCuacaData,
+            backgroundColor: statusCuacaColors,
+            borderColor: statusCuacaColors.map(color => color.replace('0.7)', '1)')),
+            borderWidth: 2
+        }]
+    };
+
+    if(cuacaChart){
+        cuacaChart.destroy()
+    }
+
+    cuacaChart = new Chart(ctxStatusCuaca, {
+        type: 'bar',
+        data: dataStatusCuaca,
+        options: {
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    title: {
+                        display : true,
+                        text : 'Jumlah Kemunculan'
+                    },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
 function getStatusCuaca(intensitasCH){
     if(intensitasCH < 6){
         return "Hujan Sangat Ringan"
@@ -260,7 +412,6 @@ function getStatusCuaca(intensitasCH){
         return "Hujan Sangat Lebat"
     }
 }
-
 
 // Generate default inputs and run simulation on page load
 window.onload = () => {

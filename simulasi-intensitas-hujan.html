@@ -35,6 +35,9 @@
         .input-div {
             max-width: 50rem;
         }
+        .grafik{
+          margin-top: 50px;
+        }
     </style>
 </head>
 <body>
@@ -44,6 +47,10 @@
     <button onclick="generateInputsByClick()">Buat Input</button>
 
     <div id="inputContainer"></div>
+
+    <br />
+    <label for="numSimulation">Jumlah Simulasi:</label>
+    <input type="number" id="numSimulation" min="1" value="100" required>
 
     <br />
     <button onclick="buatSimulasiIntensitasCurahHujan()">Buat Simulasi</button>
@@ -68,8 +75,17 @@
         </tbody>
     </table>
 
-    
+    <div class="grafik">
+      <h2 id="label-grafik-cuaca"></h2>
+      <canvas id="statusCuacaChart"></canvas>
+    </div>
 
+    <div class="grafik">
+      <h2 id="label-grafik-simulasi"></h2>
+      <canvas id="simulasiChart"></canvas>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
