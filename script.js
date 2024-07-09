@@ -25,6 +25,7 @@ const defaultLamaHujan = [
 ];
 
 let simulasiChart;
+let cuacaChart;
 
 function generateInputsByClick() {
     const numInputs = document.getElementById('numInputs').value;
@@ -43,7 +44,18 @@ function generateInputs(numInputs, defaultVal = false) {
     const inputContainer = document.getElementById('inputContainer');
     inputContainer.innerHTML = '';
 
-    // Create Curah Hujan inputs
+    const cuacaChartLabel = document.getElementById('label-grafik-cuaca')
+    cuacaChartLabel.innerHTML = ''
+    const simulasiChartLabel = document.getElementById('label-grafik-simulasi')
+    simulasiChartLabel.innerHTML = ''
+
+    if(simulasiChart){
+        simulasiChart.destroy()
+    }
+    if(cuacaChart){
+        cuacaChart.destroy()
+    }
+
     const curahHujanDiv = document.createElement('div');
     curahHujanDiv.innerHTML = '<label>Curah Hujan Bulanan (mm):</label><br>';
     curahHujanDiv.classList.add('input-div')
@@ -61,7 +73,6 @@ function generateInputs(numInputs, defaultVal = false) {
     }
     inputContainer.appendChild(curahHujanDiv);
 
-    // Create Lama Hujan inputs
     const lamaHujanDiv = document.createElement('div');
     lamaHujanDiv.classList.add('input-div')
     lamaHujanDiv.innerHTML = '<label>Lama Hujan Bulanan (hari):</label><br>';
@@ -90,7 +101,7 @@ function buatSimulasiIntensitasCurahHujan() {
     let zTerakhirCH = 10122034
     let zTerakhirLH = 10122002
 
-    let banyakSimulasi = 100;
+    const banyakSimulasi = document.getElementById('numSimulation').value
     let dataHasilSimulasi = []
 
     for(let i = 0; i < banyakSimulasi; i++){
@@ -168,11 +179,15 @@ function getIntervalAngkaAcak() {
         let curLamaHujanVal = lamaHujanInputs[i].value
 
         if(curCurahHujanVal == "" || curLamaHujanVal == ""){
-            return alert("Input tidak valid!!")
+            return alert("Input tidak valid.")
+        }
+
+        if(curCurahHujanVal < 0 || curLamaHujanVal < 0){
+            return alert("Input tidak boleh bernilai negatif.")
         }
 
         if(curLamaHujanVal > 31){
-            return alert("Input lama hujan tidak boleh lebih dari 31")
+            return alert("Input lama hujan tidak boleh lebih dari 31.")
         }
         
         if(String(curCurahHujanVal) in frekuensiCurahHujan){
@@ -358,11 +373,11 @@ function buatChartPerhitunganStatusCuaca(dataHasilSimulasi){
         }]
     };
 
-    if(window.cuacaChart){
-        window.cuacaChart.destroy()
+    if(cuacaChart){
+        cuacaChart.destroy()
     }
 
-    window.cuacaChart = new Chart(ctxStatusCuaca, {
+    cuacaChart = new Chart(ctxStatusCuaca, {
         type: 'bar',
         data: dataStatusCuaca,
         options: {
@@ -397,7 +412,6 @@ function getStatusCuaca(intensitasCH){
         return "Hujan Sangat Lebat"
     }
 }
-
 
 // Generate default inputs and run simulation on page load
 window.onload = () => {
